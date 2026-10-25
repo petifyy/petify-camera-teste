@@ -30,13 +30,6 @@ export default function HomeScreen() {
           que fará um melhor monitoramento!
         </Text>
 
-        <View style={styles.imagemArea}>
-          <Text style={styles.imagemTexto}>IMAGEMEXEMPLO</Text>
-          <Text style={styles.imagemLegenda}>
-            Imagem ilustrativa de uma câmera
-          </Text>
-        </View>
-
         <View style={styles.opcoes}>
           <View style={[styles.opcao, styles.opcaoAmarela]}>
             <Text style={styles.opcaoTitulo}>
@@ -132,33 +125,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
   },
-  imagemArea: {
-    minHeight: 110,
-    backgroundColor: '#F0F8FC',
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#DCEEF7',
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    marginBottom: 20,
-    padding: 12,
-  },
-  imagemTexto: {
-    color: AZUL,
-    fontSize: 17,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  imagemLegenda: {
-    color: '#718692',
-    fontSize: 11,
-    marginTop: 6,
-  },
   opcoes: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 20,
   },
   opcao: {
     flex: 1,

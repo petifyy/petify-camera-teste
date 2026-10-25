@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   link: {
-    color: '#6C5CE7',
+    color: '#3498db',
     marginTop: 8,
     fontWeight: '600',
   },

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { BRIDGE } from '../config';
 
@@ -16,33 +18,6 @@ const AZUL_ESCURO = '#004468';
 const AZUL = '#389DD1';
 const AZUL_CLARO = '#66BDEA';
 const AMARELO = '#FFE26D';
-
-const passos = [
-  {
-    titulo: 'Ligue sua câmera',
-    descricao:
-      'Conecte a câmera à tomada e aguarde até que ela termine de iniciar.',
-    icone: '1',
-  },
-  {
-    titulo: 'Conecte ao Wi-Fi',
-    descricao:
-      'Configure a câmera pelo aplicativo da própria marca. Deixe o celular e a câmera na mesma rede Wi-Fi.',
-    icone: '2',
-  },
-  {
-    titulo: 'Localize o endereço IP',
-    descricao:
-      'Procure o endereço IP da câmera nas configurações do dispositivo, no aplicativo da marca ou na lista de aparelhos conectados ao roteador.',
-    icone: '3',
-  },
-  {
-    titulo: 'Confira os dados de acesso',
-    descricao:
-      'Você precisará do usuário e da senha do dispositivo. Verifique também se o modelo oferece ONVIF e se esse acesso está habilitado.',
-    icone: '4',
-  },
-];
 
 export default function ConectarScreen() {
   const router = useRouter();
@@ -64,7 +39,7 @@ export default function ConectarScreen() {
 
   async function conectar() {
     if (!marca) {
-      Alert.alert('Marca não identificada', 'Volte e selecione a marca da câmera.');
+      Alert.alert('Atenção', 'Selecione novamente a marca da sua câmera.');
       return;
     }
 
@@ -108,7 +83,7 @@ export default function ConectarScreen() {
 
       Alert.alert(
         'Não foi possível conectar',
-        'Confira o IP, as credenciais, a rede Wi-Fi e se o modelo oferece ONVIF.\n\n' +
+        'Confira o IP, os dados de acesso e a compatibilidade da câmera com ONVIF.\n\n' +
           mensagem,
       );
     } finally {
@@ -121,56 +96,126 @@ export default function ConectarScreen() {
       style={styles.container}
       contentContainerStyle={styles.conteudo}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
     >
-      <Stack.Screen options={{ title: 'Conectar câmera' }} />
+      <Stack.Screen
+        options={{
+          title: etapa === 0 ? 'Conecte a câmera' : 'Dados da câmera',
+        }}
+      />
 
-      <View style={styles.cabecalho}>
-        <View style={styles.logoCirculo}>
-          <Text style={styles.logoTexto}>P</Text>
-        </View>
-        <Text style={styles.marcaPetify}>petify</Text>
-        <Text style={styles.subtitulo}>
-          {marca?.nome || 'Sua câmera'} · Configuração
+      <TouchableOpacity
+        style={styles.voltar}
+        onPress={() => {
+          if (etapa === 1) {
+            setEtapa(0);
+          } else {
+            router.back();
+          }
+        }}
+      >
+        <Ionicons name="chevron-back" size={28} color="#858585" />
+      </TouchableOpacity>
+
+      <View style={styles.logoArea}>
+        <Text style={styles.logo}>IMAGEMEXEMPLO</Text>
+        <Text style={styles.tituloLogo}>
+          {etapa === 0 ? 'Conecte sua câmera' : 'Dados de conexão'}
         </Text>
-      </View>
-
-      <View style={styles.progresso}>
-        {[0, 1].map((item) => (
-          <View
-            key={item}
-            style={[
-              styles.progressoParte,
-              etapa === item && styles.progressoAtivo,
-            ]}
-          />
-        ))}
       </View>
 
       {etapa === 0 ? (
         <>
-          <Text style={styles.titulo}>Vamos preparar sua câmera?</Text>
-          <Text style={styles.textoIntro}>
-            Siga estas etapas antes de informar os dados de acesso.
-          </Text>
-
-          {passos.map((passo) => (
-            <View key={passo.icone} style={styles.cardPasso}>
-              <View style={styles.numero}>
-                <Text style={styles.numeroTexto}>{passo.icone}</Text>
-              </View>
-              <View style={styles.textoPasso}>
-                <Text style={styles.tituloPasso}>{passo.titulo}</Text>
-                <Text style={styles.descricaoPasso}>{passo.descricao}</Text>
+          <View style={styles.ilustracao}>
+            <View style={styles.circuloExterno}>
+              <View style={styles.circuloInterno}>
+                <Text style={styles.imagemExemplo}>IMAGEMEXEMPLO</Text>
               </View>
             </View>
-          ))}
+          </View>
 
-          <View style={styles.aviso}>
-            <Text style={styles.avisoTitulo}>Importante</Text>
-            <Text style={styles.avisoTexto}>
-              Nem toda câmera é compatível com ONVIF. Se não encontrar o IP ou
-              os dados de acesso, consulte o manual do seu modelo.
-            </Text>
+          <Text style={styles.tituloSecao}>Passos para conexão</Text>
+
+          <View style={styles.passo}>
+            <View style={styles.iconePasso}>
+              <Ionicons
+                name="power-outline"
+                size={29}
+                color={AZUL}
+              />
+            </View>
+            <View style={styles.textoPasso}>
+              <Text style={styles.tituloPasso}>Ligue a câmera</Text>
+              <Text style={styles.descricaoPasso}>
+                Conecte-a à tomada e aguarde até que termine de iniciar.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.passo}>
+            <View style={styles.iconePasso}>
+              <Ionicons
+                name="wifi-outline"
+                size={29}
+                color={AZUL}
+              />
+            </View>
+            <View style={styles.textoPasso}>
+              <Text style={styles.tituloPasso}>Conecte ao Wi-Fi</Text>
+              <Text style={styles.descricaoPasso}>
+                Configure a câmera pelo aplicativo da marca. O celular e a
+                câmera devem estar na mesma rede.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.passo}>
+            <View style={styles.iconePasso}>
+              <Ionicons
+                name="search-outline"
+                size={29}
+                color={AZUL}
+              />
+            </View>
+            <View style={styles.textoPasso}>
+              <Text style={styles.tituloPasso}>Procure o endereço IP</Text>
+              <Text style={styles.descricaoPasso}>
+                Consulte as configurações da câmera, seu aplicativo ou a lista
+                de dispositivos do roteador.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.passo}>
+            <View style={styles.iconePasso}>
+              <Ionicons
+                name="lock-closed-outline"
+                size={27}
+                color={AZUL}
+              />
+            </View>
+            <View style={styles.textoPasso}>
+              <Text style={styles.tituloPasso}>Confira o acesso ONVIF</Text>
+              <Text style={styles.descricaoPasso}>
+                Verifique se seu modelo oferece ONVIF e obtenha o usuário e a
+                senha do dispositivo.
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.dica}>
+            <Ionicons
+              name="information-circle-outline"
+              size={27}
+              color={AZUL_ESCURO}
+            />
+            <View style={styles.dicaTextoArea}>
+              <Text style={styles.dicaTitulo}>Dica</Text>
+              <Text style={styles.dicaTexto}>
+                Mantenha a câmera ligada e próxima do roteador durante a
+                configuração. Nem todos os modelos são compatíveis.
+              </Text>
+            </View>
           </View>
 
           <TouchableOpacity
@@ -183,46 +228,68 @@ export default function ConectarScreen() {
         </>
       ) : (
         <>
-          <Text style={styles.titulo}>Dados da câmera</Text>
-          <Text style={styles.textoIntro}>
-            Informe os dados do dispositivo {marca?.nome || 'selecionado'}.
+          <View style={styles.ilustracaoPequena}>
+            <View style={styles.circuloExterno}>
+              <View style={styles.circuloInterno}>
+                <Text style={styles.imagemExemplo}>IMAGEMEXEMPLO</Text>
+              </View>
+            </View>
+          </View>
+
+          <Text style={styles.tituloSecao}>
+            {marca?.nome || 'Sua câmera'}
+          </Text>
+
+          <Text style={styles.instrucaoCampos}>
+            Informe os dados do dispositivo para tentar estabelecer a conexão.
           </Text>
 
           <Text style={styles.label}>Endereço IP</Text>
           <TextInput
             style={styles.input}
             placeholder="Ex.: 192.168.0.50"
-            placeholderTextColor="#7B929E"
+            placeholderTextColor="#999999"
             value={ip}
             onChangeText={setIp}
             keyboardType="numbers-and-punctuation"
             autoCapitalize="none"
           />
 
-          <Text style={styles.label}>Usuário do dispositivo</Text>
+          <Text style={styles.label}>Usuário da câmera</Text>
           <TextInput
             style={styles.input}
-            placeholder="Digite o usuário da câmera"
-            placeholderTextColor="#7B929E"
+            placeholder="Digite o usuário do dispositivo"
+            placeholderTextColor="#999999"
             value={usuario}
             onChangeText={setUsuario}
             autoCapitalize="none"
           />
 
-          <Text style={styles.label}>Senha do dispositivo</Text>
+          <Text style={styles.label}>Senha da câmera</Text>
           <TextInput
             style={styles.input}
-            placeholder="Digite a senha da câmera"
-            placeholderTextColor="#7B929E"
+            placeholder="Digite a senha do dispositivo"
+            placeholderTextColor="#999999"
             value={senha}
             onChangeText={setSenha}
             secureTextEntry
             autoCapitalize="none"
           />
 
-          <Text style={styles.ajuda}>
-            Esses dados são usados para tentar acessar a câmera pela rede local.
-          </Text>
+          <View style={styles.dica}>
+            <Ionicons
+              name="information-circle-outline"
+              size={27}
+              color={AZUL_ESCURO}
+            />
+            <View style={styles.dicaTextoArea}>
+              <Text style={styles.dicaTitulo}>Atenção</Text>
+              <Text style={styles.dicaTexto}>
+                Use os dados de acesso da câmera, que podem ser diferentes
+                do login do aplicativo da marca.
+              </Text>
+            </View>
+          </View>
 
           <TouchableOpacity
             style={[styles.botao, loading && styles.botaoDesativado]}
@@ -236,13 +303,6 @@ export default function ConectarScreen() {
               <Text style={styles.botaoTexto}>Conectar câmera</Text>
             )}
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.botaoSecundario}
-            onPress={() => setEtapa(0)}
-          >
-            <Text style={styles.botaoSecundarioTexto}>Voltar às instruções</Text>
-          </TouchableOpacity>
         </>
       )}
     </ScrollView>
@@ -252,177 +312,172 @@ export default function ConectarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FAFD',
+    backgroundColor: '#FFFFFF',
   },
   conteudo: {
-    padding: 20,
-    paddingBottom: 36,
+    paddingHorizontal: 31,
+    paddingTop: 12,
+    paddingBottom: 30,
   },
-  cabecalho: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  logoCirculo: {
-    width: 44,
-    height: 44,
-    borderRadius: 15,
-    backgroundColor: AZUL_ESCURO,
-    alignItems: 'center',
+  voltar: {
+    width: 34,
+    height: 34,
     justifyContent: 'center',
+    marginLeft: -9,
   },
-  logoTexto: {
-    color: '#FFFFFF',
-    fontSize: 25,
-    fontWeight: '800',
-  },
-  marcaPetify: {
-    color: AZUL_ESCURO,
-    fontSize: 28,
-    fontWeight: '800',
-    marginTop: 5,
-    fontStyle: 'italic',
-  },
-  subtitulo: {
-    color: '#547080',
-    fontSize: 14,
-    marginTop: 5,
-  },
-  progresso: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 24,
-  },
-  progressoParte: {
-    flex: 1,
-    height: 5,
-    borderRadius: 5,
-    backgroundColor: '#D9E7EF',
-  },
-  progressoAtivo: {
-    backgroundColor: AZUL,
-  },
-  titulo: {
-    fontSize: 23,
-    fontWeight: '800',
-    color: AZUL_ESCURO,
-    marginBottom: 8,
-  },
-  textoIntro: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#526B79',
-    marginBottom: 20,
-  },
-  cardPasso: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
+  logoArea: {
+    alignItems: 'center',
+    marginTop: 2,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E0EDF4',
-    gap: 12,
   },
-  numero: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: '#DFF3FF',
+  logo: {
+    color: AZUL,
+    fontSize: 29,
+    fontWeight: '500',
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  tituloLogo: {
+    fontSize: 16,
+    color: '#171717',
+    marginTop: 11,
+  },
+  ilustracao: {
+    height: 175,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  numeroTexto: {
-    fontSize: 16,
+  ilustracaoPequena: {
+    height: 125,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circuloExterno: {
+    width: 142,
+    height: 142,
+    borderRadius: 71,
+    backgroundColor: '#F1F9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circuloInterno: {
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    backgroundColor: '#DFF1FC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  imagemExemplo: {
+    fontSize: 12,
     fontWeight: '800',
     color: AZUL_ESCURO,
+    textAlign: 'center',
+  },
+  tituloSecao: {
+    fontSize: 16,
+    color: AZUL,
+    fontWeight: '600',
+    marginTop: 3,
+    marginBottom: 12,
+  },
+  passo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 13,
+    gap: 11,
+  },
+  iconePasso: {
+    width: 43,
+    height: 43,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E8EDF0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    elevation: 3,
   },
   textoPasso: {
     flex: 1,
   },
   tituloPasso: {
-    color: AZUL_ESCURO,
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
-    marginBottom: 5,
+    color: '#222222',
+    marginBottom: 2,
   },
   descricaoPasso: {
-    color: '#526B79',
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 10,
+    lineHeight: 14,
+    color: '#888888',
   },
-  aviso: {
-    backgroundColor: '#FFF8D9',
+  dica: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#E0F0FF',
     borderRadius: 14,
-    padding: 15,
-    marginTop: 4,
-    marginBottom: 20,
+    padding: 12,
+    marginTop: 7,
+    marginBottom: 13,
   },
-  avisoTitulo: {
-    color: AZUL_ESCURO,
-    fontSize: 14,
-    fontWeight: '800',
-    marginBottom: 5,
+  dicaTextoArea: {
+    flex: 1,
   },
-  avisoTexto: {
-    color: '#52616A',
+  dicaTitulo: {
     fontSize: 13,
-    lineHeight: 19,
-  },
-  label: {
+    fontWeight: '800',
     color: AZUL_ESCURO,
-    fontSize: 14,
-    fontWeight: '700',
-    marginBottom: 7,
-    marginTop: 12,
+    marginBottom: 2,
   },
-  input: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D4E4ED',
-    borderRadius: 13,
-    paddingHorizontal: 15,
-    paddingVertical: 14,
-    color: AZUL_ESCURO,
-    fontSize: 15,
-  },
-  ajuda: {
-    fontSize: 12,
-    lineHeight: 18,
-    color: '#647D8B',
-    marginTop: 12,
-    marginBottom: 20,
+  dicaTexto: {
+    fontSize: 10,
+    lineHeight: 14,
+    color: '#667D89',
   },
   botao: {
     backgroundColor: AZUL,
-    minHeight: 52,
-    borderRadius: 15,
+    minHeight: 46,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
-    marginTop: 8,
-    shadowColor: AZUL_ESCURO,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 7,
-    elevation: 3,
+    paddingHorizontal: 18,
+    marginTop: 1,
   },
   botaoDesativado: {
     opacity: 0.65,
   },
   botaoTexto: {
-    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: '500',
+    color: '#FFFFFF',
   },
-  botaoSecundario: {
-    alignItems: 'center',
-    padding: 16,
-    marginTop: 4,
+  instrucaoCampos: {
+    fontSize: 13,
+    color: '#777777',
+    lineHeight: 20,
+    marginBottom: 17,
   },
-  botaoSecundarioTexto: {
+  label: {
     color: AZUL_ESCURO,
+    fontSize: 13,
     fontWeight: '700',
+    marginBottom: 7,
+    marginTop: 13,
+  },
+  input: {
+    minHeight: 48,
+    borderBottomWidth: 1.5,
+    borderBottomColor: AMARELO,
+    paddingHorizontal: 2,
+    paddingVertical: 10,
     fontSize: 14,
+    color: AZUL_ESCURO,
   },
 });
