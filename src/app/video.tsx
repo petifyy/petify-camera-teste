@@ -26,7 +26,7 @@ export default function VideoScreen() {
 
       <WebView
         style={styles.video}
-        source={{ uri: `${GO2RTC}/stream.html?src=camera1` }}
+        source={{ uri: GO2RTC }}
         allowsInlineMediaPlayback
         javaScriptEnabled
       />

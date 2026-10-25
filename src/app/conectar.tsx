@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
     color: '#667D89',
   },
   botao: {
-    backgroundColor: AZUL,
+    backgroundColor: "#2E98FE",
     minHeight: 46,
     borderRadius: 28,
     alignItems: 'center',

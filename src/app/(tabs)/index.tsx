@@ -63,6 +63,16 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
         </View>
+
+        <TouchableOpacity
+          style={styles.botaoTeste}
+          onPress={() => router.push('/video')}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.botaoTesteTexto}>
+            Testar vídeo (temporário)
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <Text style={styles.rodape}>
@@ -179,6 +189,21 @@ const styles = StyleSheet.create({
     color: AZUL_ESCURO,
     fontSize: 14,
     fontWeight: '800',
+  },
+  botaoTeste: {
+    marginTop: 16,
+    minHeight: 46,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: AZUL,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+  botaoTesteTexto: {
+    color: AZUL_ESCURO,
+    fontSize: 14,
+    fontWeight: '700',
   },
   rodape: {
     color: '#78909C',
