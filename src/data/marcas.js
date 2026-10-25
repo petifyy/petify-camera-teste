@@ -5,4 +5,5 @@ export const MARCAS = [
     modelos: ['Linha VIP (confirmar modelo)'] },
   { id: 'reolink', nome: 'Reolink', obs: 'Modelos de bateria geralmente não têm ONVIF', porta: 8000,
     modelos: ['Confirmar modelo'] },
+  { id: 'jortan',  nome: 'JORTAN',  obs: 'Confirme se o modelo oferece ONVIF ou RTSP.',  porta: 80,  modelos: ['Confirmar modelo']},
 ];
