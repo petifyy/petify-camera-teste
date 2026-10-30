@@ -1,6 +1,8 @@
 
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
+import { WebView } from 'react-native-webview';
+import { GO2RTC } from '../../config';
 
 const AZUL_ESCURO = '#004468';
 const AZUL = '#389DD1';
@@ -9,6 +11,53 @@ const AMARELO = '#FFE26D';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ dados?: string }>();
+
+  let dados: any = {};
+
+  try {
+    dados = params.dados ? JSON.parse(params.dados) : {};
+  } catch {
+    dados = {};
+  }
+
+  const nomeStream = dados.stream;
+  const cameraConectada = !!dados.info && !!nomeStream;
+  const nomeCamera = dados.info?.manufacturer || 'Câmera';
+  const modeloCamera = dados.info?.model || '';
+
+  const videoUrl = `${GO2RTC.replace(/\/$/, '')}/api/stream.mjpeg?src=${encodeURIComponent(nomeStream || '')}`;
+
+  const videoHtml = `
+    <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+          }
+          body {
+            background: #000;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+          }
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+          }
+        </style>
+      </head>
+      <body>
+        <img src="${videoUrl}" />
+      </body>
+    </html>
+  `;
 
   return (
     <ScrollView
@@ -18,65 +67,103 @@ export default function HomeScreen() {
     >
       <Stack.Screen options={{ title: 'Petify Camera' }} />
 
-      <View style={styles.logoArea}>
-        <Text style={styles.logo}>petify</Text>
-        <Text style={styles.logoSubtitulo}>CUIDADO E MONITORAMENTO</Text>
+      <View style={styles.logoContainer}>
+        <Text style={styles.logo}>Petify</Text>
       </View>
 
       <View style={styles.cardPrincipal}>
         <Text style={styles.titulo}>Câmera ao vivo</Text>
         <Text style={styles.descricao}>
-          A conexão com câmeras compatíveis é uma função extra da Petify
-          que fará um melhor monitoramento!
+          Acompanhe seu pet de onde estiver.
         </Text>
 
-        <View style={styles.opcoes}>
-          <View style={[styles.opcao, styles.opcaoAmarela]}>
-            <Text style={styles.opcaoTitulo}>
-              Tenho uma câmera compatível!
-            </Text>
+        {cameraConectada ? (
+          <View style={styles.cameraConectada}>
+            <View style={styles.cameraCabecalho}>
+              <View>
+                <Text style={styles.cameraNome}>
+                  {nomeCamera} {modeloCamera}
+                </Text>
+                <Text style={styles.cameraSubtitulo}>
+                  Sua câmera está conectada
+                </Text>
+              </View>
 
-            <View style={styles.espaco} />
+              <View style={styles.statusAoVivo}>
+                <View style={styles.pontoAoVivo} />
+                <Text style={styles.statusTexto}>AO VIVO</Text>
+              </View>
+            </View>
+
+            <View style={styles.videoContainer}>
+              <WebView
+                style={styles.video}
+                source={{ html: videoHtml }}
+                javaScriptEnabled
+                scrollEnabled={false}
+                allowsInlineMediaPlayback
+              />
+            </View>
+
+            <View style={styles.controlesCamera}>
+              <View style={styles.controleDesativado}>
+                <Text style={styles.controleTexto}>Som</Text>
+                <Text style={styles.controleLegenda}>Em breve</Text>
+              </View>
+
+              <View style={styles.controleDesativado}>
+                <Text style={styles.controleTexto}>Gravar</Text>
+                <Text style={styles.controleLegenda}>Em breve</Text>
+              </View>
+            </View>
 
             <TouchableOpacity
-              style={[styles.botao, styles.botaoAzul]}
-              onPress={() => router.push('/marcas')}
-              activeOpacity={0.85}
+              style={styles.botaoExpandir}
+              onPress={() =>
+                router.push({
+                  pathname: '/video',
+                  params: { dados: JSON.stringify(dados) },
+                })
+              }
             >
-              <Text style={styles.botaoTextoClaro}>Conectar</Text>
+              <Text style={styles.botaoExpandirTexto}>
+                Expandir vídeo
+              </Text>
             </TouchableOpacity>
           </View>
+        ) : (
+          <View style={styles.opcoes}>
+            <View style={[styles.opcao, styles.opcaoAmarela]}>
+              <Text style={styles.opcaoTitulo}>
+                Tenho uma câmera compatível!
+              </Text>
 
-          <View style={[styles.opcao, styles.opcaoAzul]}>
-            <Text style={styles.opcaoTitulo}>
-              Quero uma câmera para monitoramento
-            </Text>
+              <TouchableOpacity
+                style={styles.botaoConectar}
+                onPress={() => router.push('/marcas')}
+              >
+                <Text style={styles.botaoConectarTexto}>Conectar</Text>
+              </TouchableOpacity>
+            </View>
 
-            <View style={styles.espaco} />
+            <View style={[styles.opcao, styles.opcaoAzul]}>
+              <Text style={styles.opcaoTitulo}>
+                Quero uma câmera para monitoramento
+              </Text>
 
-            <TouchableOpacity
-              style={[styles.botao, styles.botaoAmarelo]}
-              onPress={() => router.push('/comprar')}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.botaoTextoEscuro}>Compre já!</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.botaoComprar}
+                onPress={() => router.push('/comprar')}
+              >
+                <Text style={styles.botaoComprarTexto}>Compre já!</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.botaoTeste}
-          onPress={() => router.push('/video')}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.botaoTesteTexto}>
-            Testar vídeo (temporário)
-          </Text>
-        </TouchableOpacity>
+        )}
       </View>
 
       <Text style={styles.rodape}>
-        PETIFY · MAIS CUIDADO, MAIS TRANQUILIDADE
+        Petify Camera
       </Text>
     </ScrollView>
   );
@@ -85,132 +172,172 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5FAFD',
+    backgroundColor: '#F5FAFC',
   },
   conteudo: {
     flexGrow: 1,
     padding: 20,
-    paddingTop: 28,
-    paddingBottom: 24,
-    justifyContent: 'center',
   },
-  logoArea: {
+  logoContainer: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginTop: 20,
+    marginBottom: 30,
   },
   logo: {
+    fontSize: 32,
+    fontWeight: 'bold',
     color: AZUL_ESCURO,
-    fontSize: 39,
-    fontWeight: '800',
-    fontStyle: 'italic',
-    letterSpacing: -2,
-  },
-  logoSubtitulo: {
-    color: AZUL,
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 2,
-    marginTop: 2,
   },
   cardPrincipal: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 26,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: '#E7EEF2',
-    shadowColor: AZUL_ESCURO,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.10,
-    shadowRadius: 12,
-    elevation: 5,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   titulo: {
+    fontSize: 22,
+    fontWeight: 'bold',
     color: AZUL_ESCURO,
-    fontSize: 25,
-    fontWeight: '700',
     marginBottom: 8,
   },
   descricao: {
-    color: '#526570',
     fontSize: 14,
-    lineHeight: 21,
+    color: '#647985',
+    marginBottom: 20,
   },
   opcoes: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 20,
   },
   opcao: {
     flex: 1,
-    minWidth: 0,
-    minHeight: 205,
-    borderRadius: 24,
-    padding: 12,
-    paddingTop: 20,
-    alignItems: 'center',
+    minHeight: 180,
+    borderRadius: 16,
+    padding: 14,
+    justifyContent: 'space-between',
   },
   opcaoAmarela: {
-    backgroundColor: '#FFF6D7',
-  },
-  opcaoAzul: {
-    backgroundColor: '#D8EFF9',
-  },
-  opcaoTitulo: {
-    color: AZUL_ESCURO,
-    fontSize: 17,
-    fontWeight: '700',
-    textAlign: 'center',
-    lineHeight: 23,
-  },
-  espaco: {
-    flex: 1,
-    minHeight: 18,
-  },
-  botao: {
-    width: '100%',
-    minHeight: 43,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  botaoAzul: {
-    backgroundColor: AZUL,
-  },
-  botaoAmarelo: {
     backgroundColor: AMARELO,
   },
-  botaoTextoClaro: {
-    color: '#FFFFFF',
+  opcaoAzul: {
+    backgroundColor: AZUL_CLARO,
+  },
+  opcaoTitulo: {
     fontSize: 15,
-    fontWeight: '700',
-  },
-  botaoTextoEscuro: {
+    fontWeight: 'bold',
     color: AZUL_ESCURO,
-    fontSize: 14,
-    fontWeight: '800',
   },
-  botaoTeste: {
-    marginTop: 16,
-    minHeight: 46,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: AZUL,
+  botaoConectar: {
+    backgroundColor: AZUL_ESCURO,
+    paddingVertical: 10,
+    borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
   },
-  botaoTesteTexto: {
+  botaoConectarTexto: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  botaoComprar: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  botaoComprarTexto: {
+    color: AZUL_ESCURO,
+    fontWeight: 'bold',
+  },
+  cameraConectada: {
+    gap: 14,
+  },
+  cameraCabecalho: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  cameraNome: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: AZUL_ESCURO,
+  },
+  cameraSubtitulo: {
+    fontSize: 12,
+    color: '#647985',
+    marginTop: 3,
+  },
+  statusAoVivo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FDECEC',
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 5,
+  },
+  pontoAoVivo: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: '#E53935',
+  },
+  statusTexto: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#C62828',
+  },
+  videoContainer: {
+    width: '100%',
+    height: 210,
+    backgroundColor: '#000000',
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  video: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  controlesCamera: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  controleDesativado: {
+    flex: 1,
+    backgroundColor: '#F0F5F7',
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  controleTexto: {
     color: AZUL_ESCURO,
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: 'bold',
+  },
+  controleLegenda: {
+    color: '#82939B',
+    fontSize: 10,
+    marginTop: 3,
+  },
+  botaoExpandir: {
+    backgroundColor: AZUL_ESCURO,
+    paddingVertical: 13,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  botaoExpandirTexto: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   rodape: {
-    color: '#78909C',
-    fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 1.1,
     textAlign: 'center',
-    marginTop: 22,
+    color: '#82939B',
+    fontSize: 12,
+    marginTop: 30,
+    marginBottom: 15,
   },
 });

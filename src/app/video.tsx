@@ -15,6 +15,8 @@ export default function VideoScreen() {
     dados = {};
   }
 
+  const videoUrl = `${GO2RTC.replace(/\/$/, '')}/api/stream.mjpeg?src=intelbras`;
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: 'Ao vivo' }} />
@@ -26,9 +28,12 @@ export default function VideoScreen() {
 
       <WebView
         style={styles.video}
-        source={{ uri: GO2RTC }}
-        allowsInlineMediaPlayback
+        source={{
+          uri: `${GO2RTC}/stream.html?src=intelbras`,
+        }}
         javaScriptEnabled
+        allowsInlineMediaPlayback
+        mediaPlaybackRequiresUserAction={false}
       />
     </View>
   );
@@ -46,5 +51,6 @@ const styles = StyleSheet.create({
   },
   video: {
     flex: 1,
+    backgroundColor: '#000000',
   },
 });

@@ -73,8 +73,8 @@ export default function ConectarScreen() {
         throw new Error(dados.erro || 'Não foi possível conectar à câmera.');
       }
 
-      router.push({
-        pathname: '/video',
+      router.replace({
+        pathname: '/',
         params: { dados: JSON.stringify(dados) },
       });
     } catch (erro) {
