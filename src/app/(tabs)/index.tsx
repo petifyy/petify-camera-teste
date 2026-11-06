@@ -1,8 +1,8 @@
 
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
-import { WebView } from 'react-native-webview';
-import { GO2RTC } from '../../config';
+import { useState } from 'react';
+import { VLCPlayer } from 'react-native-vlc-media-player';
 
 const AZUL_ESCURO = '#004468';
 const AZUL = '#389DD1';
@@ -21,43 +21,10 @@ export default function HomeScreen() {
     dados = {};
   }
 
-  const nomeStream = dados.stream;
-  const cameraConectada = !!dados.info && !!nomeStream;
+  const [erroVideo, setErroVideo] = useState('');
+  const cameraConectada = !!dados.url;
   const nomeCamera = dados.info?.manufacturer || 'Câmera';
   const modeloCamera = dados.info?.model || '';
-
-  const videoUrl = `${GO2RTC.replace(/\/$/, '')}/api/stream.mjpeg?src=${encodeURIComponent(nomeStream || '')}`;
-
-  const videoHtml = `
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          * {
-            margin: 0;
-            padding: 0;
-          }
-          body {
-            background: #000;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-          }
-          img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-          }
-        </style>
-      </head>
-      <body>
-        <img src="${videoUrl}" />
-      </body>
-    </html>
-  `;
 
   return (
     <ScrollView
@@ -96,13 +63,24 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.videoContainer}>
-              <WebView
+              <VLCPlayer
                 style={styles.video}
-                source={{ html: videoHtml }}
-                javaScriptEnabled
-                scrollEnabled={false}
-                allowsInlineMediaPlayback
+                source={{
+                  uri: dados.url,
+                  initOptions: ['--rtsp-tcp', '--network-caching=300'],
+                }}
+                autoplay
+                resizeMode="contain"
+                onPlaying={() => setErroVideo('')}
+                onError={() =>
+                  setErroVideo(
+                    'Não foi possível abrir o vídeo. Confira o IP, o usuário, a senha e se o celular está no mesmo Wi-Fi da câmera.',
+                  )
+                }
               />
+              {erroVideo ? (
+                <Text style={styles.erroVideo}>{erroVideo}</Text>
+              ) : null}
             </View>
 
             <View style={styles.controlesCamera}>
@@ -300,6 +278,15 @@ const styles = StyleSheet.create({
   video: {
     flex: 1,
     backgroundColor: '#000000',
+  },
+  erroVideo: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    right: 8,
+    color: '#FFFFFF',
+    fontSize: 12,
+    textAlign: 'center',
   },
   controlesCamera: {
     flexDirection: 'row',

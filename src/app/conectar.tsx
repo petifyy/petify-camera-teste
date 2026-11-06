@@ -12,12 +12,18 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { BRIDGE } from '../config';
 
 const AZUL_ESCURO = '#004468';
 const AZUL = '#389DD1';
 const AZUL_CLARO = '#66BDEA';
 const AMARELO = '#FFE26D';
+
+const PASSOS_PADRAO = [
+  { icone: 'power-outline', titulo: 'Ligue a câmera', texto: 'Conecte-a à tomada e aguarde até que termine de iniciar.' },
+  { icone: 'wifi-outline', titulo: 'Conecte ao Wi-Fi', texto: 'Configure a câmera pelo aplicativo da marca. O celular e a câmera devem estar na mesma rede.' },
+  { icone: 'search-outline', titulo: 'Procure o endereço IP', texto: 'Consulte as configurações da câmera, seu aplicativo ou a lista de dispositivos do roteador.' },
+  { icone: 'lock-closed-outline', titulo: 'Confira o acesso ONVIF', texto: 'Verifique se seu modelo oferece ONVIF e obtenha o usuário e a senha do dispositivo.' },
+];
 
 export default function ConectarScreen() {
   const router = useRouter();
@@ -30,6 +36,8 @@ export default function ConectarScreen() {
   } catch {
     marca = null;
   }
+
+  const passos = marca?.passos?.length ? marca.passos : PASSOS_PADRAO;
 
   const [etapa, setEtapa] = useState(0);
   const [ip, setIp] = useState('');
@@ -54,24 +62,14 @@ export default function ConectarScreen() {
     setLoading(true);
 
     try {
-      const resposta = await fetch(`${BRIDGE}/connect`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ip: ip.trim(),
-          porta: marca.porta,
-          usuario: usuario.trim(),
-          senha,
-        }),
-      });
+      const usuarioUrl = encodeURIComponent(usuario.trim());
+      const senhaUrl = encodeURIComponent(senha);
+      const url = `rtsp://${usuarioUrl}:${senhaUrl}@${ip.trim()}:${marca.rtspPorta || 554}${marca.rtspCaminho || '/'}`;
 
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        throw new Error(dados.erro || 'Não foi possível conectar à câmera.');
-      }
+      const dados = {
+        url,
+        info: { manufacturer: marca.nome, model: '' },
+      };
 
       router.replace({
         pathname: '/',
@@ -136,72 +134,17 @@ export default function ConectarScreen() {
 
           <Text style={styles.tituloSecao}>Passos para conexão</Text>
 
-          <View style={styles.passo}>
-            <View style={styles.iconePasso}>
-              <Ionicons
-                name="power-outline"
-                size={29}
-                color={AZUL}
-              />
+          {passos.map((p: any) => (
+            <View key={p.titulo} style={styles.passo}>
+              <View style={styles.iconePasso}>
+                <Ionicons name={p.icone} size={28} color={AZUL} />
+              </View>
+              <View style={styles.textoPasso}>
+                <Text style={styles.tituloPasso}>{p.titulo}</Text>
+                <Text style={styles.descricaoPasso}>{p.texto}</Text>
+              </View>
             </View>
-            <View style={styles.textoPasso}>
-              <Text style={styles.tituloPasso}>Ligue a câmera</Text>
-              <Text style={styles.descricaoPasso}>
-                Conecte-a à tomada e aguarde até que termine de iniciar.
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.passo}>
-            <View style={styles.iconePasso}>
-              <Ionicons
-                name="wifi-outline"
-                size={29}
-                color={AZUL}
-              />
-            </View>
-            <View style={styles.textoPasso}>
-              <Text style={styles.tituloPasso}>Conecte ao Wi-Fi</Text>
-              <Text style={styles.descricaoPasso}>
-                Configure a câmera pelo aplicativo da marca. O celular e a
-                câmera devem estar na mesma rede.
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.passo}>
-            <View style={styles.iconePasso}>
-              <Ionicons
-                name="search-outline"
-                size={29}
-                color={AZUL}
-              />
-            </View>
-            <View style={styles.textoPasso}>
-              <Text style={styles.tituloPasso}>Procure o endereço IP</Text>
-              <Text style={styles.descricaoPasso}>
-                Consulte as configurações da câmera, seu aplicativo ou a lista
-                de dispositivos do roteador.
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.passo}>
-            <View style={styles.iconePasso}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={27}
-                color={AZUL}
-              />
-            </View>
-            <View style={styles.textoPasso}>
-              <Text style={styles.tituloPasso}>Confira o acesso ONVIF</Text>
-              <Text style={styles.descricaoPasso}>
-                Verifique se seu modelo oferece ONVIF e obtenha o usuário e a
-                senha do dispositivo.
-              </Text>
-            </View>
-          </View>
+          ))}
 
           <View style={styles.dica}>
             <Ionicons
@@ -212,8 +155,8 @@ export default function ConectarScreen() {
             <View style={styles.dicaTextoArea}>
               <Text style={styles.dicaTitulo}>Dica</Text>
               <Text style={styles.dicaTexto}>
-                Mantenha a câmera ligada e próxima do roteador durante a
-                configuração. Nem todos os modelos são compatíveis.
+                {marca?.dica ||
+                  'Mantenha a câmera ligada e próxima do roteador durante a configuração. Nem todos os modelos são compatíveis.'}
               </Text>
             </View>
           </View>
@@ -258,7 +201,7 @@ export default function ConectarScreen() {
           <Text style={styles.label}>Usuário da câmera</Text>
           <TextInput
             style={styles.input}
-            placeholder="Digite o usuário do dispositivo"
+            placeholder={marca?.usuarioPlaceholder || 'Digite o usuário do dispositivo'}
             placeholderTextColor="#999999"
             value={usuario}
             onChangeText={setUsuario}
@@ -268,7 +211,7 @@ export default function ConectarScreen() {
           <Text style={styles.label}>Senha da câmera</Text>
           <TextInput
             style={styles.input}
-            placeholder="Digite a senha do dispositivo"
+            placeholder={marca?.senhaPlaceholder || 'Digite a senha do dispositivo'}
             placeholderTextColor="#999999"
             value={senha}
             onChangeText={setSenha}
@@ -285,8 +228,8 @@ export default function ConectarScreen() {
             <View style={styles.dicaTextoArea}>
               <Text style={styles.dicaTitulo}>Atenção</Text>
               <Text style={styles.dicaTexto}>
-                Use os dados de acesso da câmera, que podem ser diferentes
-                do login do aplicativo da marca.
+                {marca?.atencao ||
+                  'Use os dados de acesso da câmera, que podem ser diferentes do login do aplicativo da marca.'}
               </Text>
             </View>
           </View>

@@ -1,8 +1,7 @@
 
 import { StyleSheet, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { WebView } from 'react-native-webview';
-import { GO2RTC } from '../config';
+import { VLCPlayer } from 'react-native-vlc-media-player';
 
 export default function VideoScreen() {
   const params = useLocalSearchParams<{ dados?: string }>();
@@ -15,7 +14,6 @@ export default function VideoScreen() {
     dados = {};
   }
 
-  const videoUrl = `${GO2RTC.replace(/\/$/, '')}/api/stream.mjpeg?src=intelbras`;
 
   return (
     <View style={styles.container}>
@@ -26,14 +24,14 @@ export default function VideoScreen() {
         {dados.info?.model || ''}
       </Text>
 
-      <WebView
+      <VLCPlayer
         style={styles.video}
         source={{
-          uri: `${GO2RTC}/stream.html?src=intelbras`,
+          uri: dados.url,
+          initOptions: ['--rtsp-tcp', '--network-caching=300'],
         }}
-        javaScriptEnabled
-        allowsInlineMediaPlayback
-        mediaPlaybackRequiresUserAction={false}
+        autoplay
+        resizeMode="contain"
       />
     </View>
   );
