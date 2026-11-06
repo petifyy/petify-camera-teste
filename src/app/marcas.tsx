@@ -1,179 +1,150 @@
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { MARCAS } from '../data/marcas';
+// Cada marca tem seus próprios passos. Para incluir uma marca nova:
+// 1) copie um bloco abaixo e troque os textos
+// 2) adicione a logo em marcas.tsx (objeto logosMarcas)
 
-export default function MarcasScreen() {
-  const router = useRouter();
-
-  const logosMarcas: Record<string, any> = {
-  intelbras: require('../../assets/images/marcasCam/intelbras.png'),
-  "tp-link tapo": require('../../assets/images/marcasCam/tapo.png'),
-  reolink: require('../../assets/images/marcasCam/reolink.png'),
-  jortan: require('../../assets/images/marcasCam/jortann.jpg'),
-};
-
-  return (
-    <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
-
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.voltar}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="chevron-back" size={30} color="#858585" />
-        </TouchableOpacity>
-
-        <Text style={styles.logo}>
-          <Text style={styles.logoPet}>pet</Text>
-          <Text style={styles.logoI}>i</Text>
-          <Text style={styles.logoFy}>fy</Text>
-        </Text>
-      </View>
-
-      <View style={styles.conteudo}>
-        <View style={styles.imagemContainer}>
-          <Image
-            source={require('../../assets/images/camera.png')}
-            style={styles.imagemCamera}
-            resizeMode="contain"
-          />
-        </View>
-
-        <Text style={styles.subtitulo}>
-          Escolha a marca da sua câmera
-        </Text>
-
-        <FlatList
-          contentContainerStyle={styles.lista}
-          data={MARCAS}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => {
-            console.log('Marca:', item.nome);
-            console.log('Logo:', logosMarcas[item.nome.toLowerCase()]);
-
-            return (
-              <TouchableOpacity
-                style={styles.card}
-                activeOpacity={0.7}
-                onPress={() =>
-                  router.push({
-                    pathname: '/conectar',
-                    params: { marca: JSON.stringify(item) },
-                  })
-                }
-              >
-                <Image
-                  source={logosMarcas[item.nome.trim().toLowerCase()]}
-                  style={styles.logoMarca}
-                  resizeMode="contain"
-                />
-
-                <Ionicons
-                  name="chevron-forward"
-                  size={25}
-                  color="#858585"
-                />
-              </TouchableOpacity>
-            );
-          }}
-        />
-      </View>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 10,
+export const MARCAS = [
+  {
+    id: 'intelbras',
+    nome: 'Intelbras',
+    porta: 80,
+    modelos: ['Linha Mibo iM5 / iM5 S', 'Linha VIP (confirmar modelo)'],
+    dica: 'Nem todo modelo Intelbras tem ONVIF. Confira na caixa ou no manual.',
+    usuarioPlaceholder: 'Normalmente: admin',
+    senhaPlaceholder: 'Senha que você criou na instalação',
+    atencao:
+      'Nas câmeras Mibo, a senha costuma ser a "chave de acesso" criada na instalação. Pode ser diferente da senha da sua conta no app.',
+    passos: [
+      {
+        icone: 'power-outline',
+        titulo: 'Ligue a câmera',
+        texto: 'Conecte na tomada e espere ela iniciar (cerca de 1 minuto).',
+      },
+      {
+        icone: 'wifi-outline',
+        titulo: 'Coloque no Wi-Fi de casa',
+        texto:
+          'Configure pelo app da Intelbras (Mibo Smart, nas câmeras iM). O celular precisa estar no mesmo Wi-Fi da câmera.',
+      },
+      {
+        icone: 'search-outline',
+        titulo: 'Descubra o endereço IP',
+        texto:
+          'Veja nas informações da câmera no app ou na lista de aparelhos do seu roteador.',
+      },
+      {
+        icone: 'key-outline',
+        titulo: 'Anote usuário e senha',
+        texto:
+          'O usuário costuma ser "admin". A senha é a que você criou ao instalar a câmera.',
+      },
+    ],
   },
-  header: {
-    height: 145,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 20,
+  {
+    id: 'tapo',
+    nome: 'TP-Link Tapo',
+    porta: 2020,
+    modelos: ['C200', 'C210', 'C310'],
+    dica: 'A Tapo só libera o acesso depois de criar a "Conta da câmera" no app.',
+    usuarioPlaceholder: 'Usuário da Conta da câmera',
+    senhaPlaceholder: 'Senha da Conta da câmera',
+    atencao:
+      'Use o usuário e a senha da "Conta da câmera", e não o login da sua conta Tapo.',
+    passos: [
+      {
+        icone: 'power-outline',
+        titulo: 'Ligue a câmera',
+        texto: 'Conecte na tomada e espere ela iniciar.',
+      },
+      {
+        icone: 'wifi-outline',
+        titulo: 'Configure no app Tapo',
+        texto:
+          'Adicione a câmera no app Tapo e conecte no Wi-Fi 2,4 GHz da sua casa.',
+      },
+      {
+        icone: 'person-outline',
+        titulo: 'Crie a "Conta da câmera"',
+        texto:
+          'No app Tapo, abra a câmera > Configurações > Avançado > Conta da câmera. Crie um usuário e uma senha (6 a 32 caracteres). O nome do menu pode mudar conforme a versão do app.',
+      },
+      {
+        icone: 'search-outline',
+        titulo: 'Descubra o endereço IP',
+        texto:
+          'Veja nas informações do dispositivo, no app Tapo, ou na lista de aparelhos do roteador.',
+      },
+    ],
   },
-  voltar: {
-    position: 'absolute',
-    left: 20,
-    top: 57,
-    zIndex: 1,
+  {
+    id: 'reolink',
+    nome: 'Reolink',
+    porta: 8000,
+    modelos: ['Modelos ligados na tomada (confirmar modelo)'],
+    dica: 'Modelos de bateria geralmente não têm ONVIF.',
+    usuarioPlaceholder: 'Ex.: admin',
+    senhaPlaceholder: 'Mesma senha do app Reolink',
+    atencao:
+      'Use o mesmo usuário e senha que você usa para abrir a câmera no app Reolink.',
+    passos: [
+      {
+        icone: 'power-outline',
+        titulo: 'Ligue a câmera',
+        texto: 'Conecte na tomada e espere ela iniciar.',
+      },
+      {
+        icone: 'wifi-outline',
+        titulo: 'Configure no app Reolink',
+        texto:
+          'Adicione a câmera no app Reolink e conecte no Wi-Fi de casa. O celular precisa estar na mesma rede.',
+      },
+      {
+        icone: 'settings-outline',
+        titulo: 'Ative o ONVIF',
+        texto:
+          'Em algumas Reolink ele vem desligado. Vá em Configurações > Rede > Avançado > Portas e ative ONVIF e RTSP. Se não achar no celular, use o programa Reolink Client no computador.',
+      },
+      {
+        icone: 'search-outline',
+        titulo: 'Descubra o endereço IP',
+        texto:
+          'Veja nas informações do dispositivo no app Reolink ou na lista de aparelhos do roteador.',
+      },
+    ],
   },
-  logo: {
-    fontSize: 43,
-    fontWeight: '400',
-    fontStyle: 'italic',
-    letterSpacing: -2.5,
-    marginTop: 15,
+  {
+    id: 'jortan',
+    nome: 'JORTAN',
+    porta: 80,
+    modelos: ['Confirmar modelo'],
+    dica: 'O suporte a ONVIF muda de modelo para modelo. Se a opção não existir nas configurações, a câmera não é compatível.',
+    usuarioPlaceholder: 'Ex.: admin',
+    senhaPlaceholder: 'Senha da câmera',
+    atencao:
+      'Se não conectar, confira se o ONVIF está ativado na câmera e se o modelo é compatível.',
+    passos: [
+      {
+        icone: 'power-outline',
+        titulo: 'Ligue a câmera',
+        texto: 'Conecte na tomada e espere ela iniciar.',
+      },
+      {
+        icone: 'wifi-outline',
+        titulo: 'Configure pelo app da câmera',
+        texto:
+          'Use o app indicado na caixa ou no manual e conecte a câmera no Wi-Fi de casa.',
+      },
+      {
+        icone: 'settings-outline',
+        titulo: 'Procure a opção ONVIF',
+        texto:
+          'Nas configurações da câmera, procure por ONVIF (ou RTSP) e ative. Se não existir, esse modelo não é compatível.',
+      },
+      {
+        icone: 'search-outline',
+        titulo: 'Descubra o endereço IP',
+        texto:
+          'Veja nas informações da câmera no app ou na lista de aparelhos do roteador.',
+      },
+    ],
   },
-  logoPet: {
-    color: '#FFE26D',
-  },
-  logoI: {
-    color: '#66BDEA',
-  },
-  logoFy: {
-    color: '#389DD1',
-  },
-  conteudo: {
-    flex: 1,
-    paddingHorizontal: 26,
-  },
-  imagemContainer: {
-    height: 170,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  imagemCamera: {
-    width: 175,
-    height: 155,
-  },
-  subtitulo: {
-    fontSize: 14,
-    fontWeight: '400',
-    color: '#0077C8',
-    marginBottom: 16,
-    marginLeft: 14,
-  },
-  lista: {
-    paddingBottom: 25,
-  },
-  card: {
-    height: 47,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 11,
-    borderWidth: 1,
-    borderColor: '#E6E6E6',
-    marginBottom: 8,
-    paddingHorizontal: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.13,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  logoMarca: {
-    width: 125,
-    height: 35,
-  },
-  cardTitulo: {
-    fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: -0.7,
-  },
-});
+];

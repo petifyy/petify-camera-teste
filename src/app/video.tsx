@@ -24,6 +24,7 @@ export default function VideoScreen() {
         {dados.info?.model || ''}
       </Text>
 
+      <View style={styles.videoFundo}>
       <VLCPlayer
         style={styles.video}
         source={{
@@ -33,6 +34,7 @@ export default function VideoScreen() {
         autoplay
         resizeMode="contain"
       />
+      </View>
     </View>
   );
 }
@@ -47,8 +49,11 @@ const styles = StyleSheet.create({
     color: '#666666',
     margin: 8,
   },
-  video: {
+  videoFundo: {
     flex: 1,
     backgroundColor: '#000000',
+  },
+  video: {
+    flex: 1,
   },
 });

@@ -277,7 +277,6 @@ const styles = StyleSheet.create({
   },
   video: {
     flex: 1,
-    backgroundColor: '#000000',
   },
   erroVideo: {
     position: 'absolute',

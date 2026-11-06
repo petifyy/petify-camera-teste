@@ -40,12 +40,16 @@
           "android": {
             "minSdkVersion": 26,
             "packagingOptions": {
-              "pickFirst": ["**/libc++_shared.so"]
+              "pickFirst": [
+                "**/libc++_shared.so"
+              ]
             }
           }
         }
       ],
-      "./plugins/withVlcGradleFix"
+      "./plugins/withVlcGradleFix",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
